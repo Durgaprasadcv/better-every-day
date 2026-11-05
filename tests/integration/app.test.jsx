@@ -87,3 +87,31 @@ test("a change in another tab pauses edits instead of replacing that tab", () =>
     "Another tab changed",
   );
 });
+
+test("undo restores only the removed task and keeps tasks added afterward", async () => {
+  const user = userEvent.setup();
+  render(<App />);
+  await user.type(
+    screen.getByRole("textbox", { name: "Task name" }),
+    "Original task",
+  );
+  await user.click(screen.getByRole("button", { name: "Add task" }));
+  expect(screen.getByRole("textbox", { name: "Task name" }).value).toBe("");
+  await user.click(screen.getByRole("checkbox", { name: /Original task/ }));
+  await user.click(
+    screen.getByRole("button", { name: "Delete Original task" }),
+  );
+  expect(screen.queryByRole("checkbox", { name: /Original task/ })).toBe(null);
+  await user.type(
+    screen.getByRole("textbox", { name: "Task name" }),
+    "Another task",
+  );
+  await user.click(screen.getByRole("button", { name: "Add task" }));
+  await user.click(screen.getByRole("button", { name: "Undo deletion" }));
+  expect(screen.getByRole("checkbox", { name: /Original task/ }).checked).toBe(
+    true,
+  );
+  expect(screen.getByRole("checkbox", { name: /Another task/ }).checked).toBe(
+    false,
+  );
+});

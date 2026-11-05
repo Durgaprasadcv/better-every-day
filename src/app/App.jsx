@@ -115,7 +115,7 @@ export default function App() {
   }
   function update(patch) {
     const latest = current.current;
-    commit({
+    return commit({
       ...latest,
       days: {
         ...latest.days,

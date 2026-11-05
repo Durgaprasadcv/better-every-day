@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { HABITS, offsetDay } from "../../shared/model/tracker.js";
 import PlannerTask from "./PlannerTask.jsx";
@@ -11,6 +12,23 @@ export default function DailyPlanner({
   setMessage,
 }) {
   const completed = selected.checked.length;
+  const [taskName, setTaskName] = useState("");
+  const [lastRemoved, setLastRemoved] = useState(null);
+  function undoDelete() {
+    if (!lastRemoved || lastRemoved.date !== date) return;
+    if (selected.tasks.some((task) => task.id === lastRemoved.task.id)) {
+      setLastRemoved(null);
+      return;
+    }
+    if (selected.tasks.length >= 100) {
+      setMessage(
+        "This day already has 100 tasks. Remove a task before restoring this one.",
+      );
+      return;
+    }
+    if (update({ tasks: [...selected.tasks, lastRemoved.task] }))
+      setLastRemoved(null);
+  }
   return (
     <fieldset disabled={disabled} className="tracker-fields">
       <section className="card">
@@ -89,13 +107,13 @@ export default function DailyPlanner({
           onSubmit={(e) => {
             e.preventDefault();
             const f = e.currentTarget;
-            const name = f.elements.task.value.trim();
+            const name = taskName.trim();
             if (!name) return;
             if (selected.tasks.length >= 100) {
               setMessage("This day already has 100 tasks.");
               return;
             }
-            update({
+            const saved = update({
               tasks: [
                 ...selected.tasks,
                 {
@@ -107,11 +125,16 @@ export default function DailyPlanner({
                 },
               ],
             });
-            f.reset();
+            if (saved) {
+              f.reset();
+              setTaskName("");
+            }
           }}
         >
           <input
             name="task"
+            value={taskName}
+            onChange={(event) => setTaskName(event.target.value)}
             aria-label="Task name"
             placeholder="What will you make time for?"
             required
@@ -133,6 +156,22 @@ export default function DailyPlanner({
             <button>Add task</button>
           </div>
         </form>
+        {lastRemoved?.date === date && (
+          <div className="notice" role="status">
+            Task removed: {lastRemoved.task.name}
+            <button className="routine-copy" type="button" onClick={undoDelete}>
+              Undo deletion
+            </button>
+            <button
+              className="textbutton"
+              type="button"
+              aria-label="Dismiss undo deletion"
+              onClick={() => setLastRemoved(null)}
+            >
+              ×
+            </button>
+          </div>
+        )}
         {selected.tasks.length === 0 && (
           <p className="empty">
             A clear day starts with one small plan. Add your first task above.
@@ -151,11 +190,12 @@ export default function DailyPlanner({
                   ),
                 })
               }
-              onDelete={() =>
-                update({
-                  tasks: selected.tasks.filter((x) => x.id !== t.id),
-                })
-              }
+              onDelete={() => {
+                if (
+                  update({ tasks: selected.tasks.filter((x) => x.id !== t.id) })
+                )
+                  setLastRemoved({ date, task: t });
+              }}
               onSave={(patch) =>
                 update({
                   tasks: selected.tasks.map((x) =>

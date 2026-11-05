@@ -19,7 +19,7 @@ Open the URL printed by Vite. Production files are emitted to `dist/`. Tests cov
 ## MVP
 
 - Daily habits: discipline, walking, exercise, sleep, screen time, household work, family time, childcare.
-- Timed tasks with Personal, Home, Family, and Childcare categories; complete, edit, delete, or repeat yesterday’s plan.
+- Timed tasks with Personal, Home, Family, and Childcare categories; complete, edit, delete with Undo, or repeat yesterday’s plan.
 - Walking minutes, sleep hours, and screen time hours.
 - Private daily wins and reflection, saved locally as you type.
 - Seven-day statistics, habit heatmap, XP, levels, consistency streaks, and achievement badges.
