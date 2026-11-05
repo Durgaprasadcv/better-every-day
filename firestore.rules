@@ -1,16 +1,51 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/app/{documentId} {
-      allow read: if request.auth != null
-        && request.auth.uid == userId
-        && documentId == "tracker";
-      allow create, update: if request.auth != null
-        && request.auth.uid == userId
-        && documentId == "tracker"
-        && request.resource.data.keys().hasOnly(["days", "updatedAt", "schemaVersion"])
-        && request.resource.data.schemaVersion == 1;
-      allow delete: if false;
+    function owner(userId) { return request.auth != null && request.auth.uid == userId; }
+    match /users/{userId}/app/tracker {
+      function valid() {
+        return request.resource.data.keys().hasAll(['schemaVersion', 'days', 'revision', 'updatedAt'])
+          && request.resource.data.keys().hasOnly(['schemaVersion', 'days', 'revision', 'updatedAt'])
+          && request.resource.data.schemaVersion == 2
+          && request.resource.data.days is map
+          && request.resource.data.days.size() <= 3660
+          && request.resource.data.revision is int
+          && request.resource.data.updatedAt == request.time;
+      }
+      allow read: if owner(userId);
+      allow create: if owner(userId) && valid() && request.resource.data.revision == 1;
+      allow update: if owner(userId) && valid() && request.resource.data.revision == resource.data.revision + 1;
+      allow delete: if owner(userId);
+    }
+    match /users/{userId}/pushDevices/{deviceId} {
+      function validDevice() {
+        let s = request.resource.data.subscription;
+        return request.resource.data.keys().hasOnly(['subscription','updatedAt'])
+          && request.resource.data.updatedAt == request.time
+          && s is map && s.keys().hasAll(['endpoint','keys'])
+          && s.keys().hasOnly(['endpoint','expirationTime','keys'])
+          && s.endpoint is string && s.endpoint.size() <= 2048
+          && s.endpoint.matches('https://(web[.]push[.]apple[.]com|fcm[.]googleapis[.]com|updates[.]push[.]services[.]mozilla[.]com)/.*')
+          && s.keys is map && s.keys.keys().hasOnly(['p256dh','auth'])
+          && s.keys.p256dh is string && s.keys.p256dh.matches('[A-Za-z0-9_-]{87,88}')
+          && s.keys.auth is string && s.keys.auth.matches('[A-Za-z0-9_-]{22,24}');
+      }
+      allow read, delete: if owner(userId);
+      allow create, update: if owner(userId) && deviceId.matches('[A-Za-z0-9-]{1,80}') && validDevice();
+    }
+    match /users/{userId}/reminders/{reminderId} {
+      allow read, delete: if owner(userId);
+      allow create: if owner(userId)
+        && reminderId.matches('[A-Za-z0-9-]{1,80}')
+        && request.resource.data.keys().hasOnly(['dueAt','status','createdAt','expiresAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.dueAt is timestamp
+        && request.resource.data.dueAt > request.time
+        && request.resource.data.dueAt <= request.time + duration.value(30,'d')
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.expiresAt == request.resource.data.dueAt + duration.value(7,'d');
+      // Only the trusted scheduler can claim and deliver records.
+      allow update: if false;
     }
   }
 }

@@ -1,0 +1,1072 @@
+:root {
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: #1a302a;
+  background: #f5f7f2;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.shell {
+  max-width: 1024px;
+  margin: auto;
+  padding: 18px 24px;
+}
+.top,
+.brand,
+.sectiontop,
+.datebar,
+.actions,
+.backup,
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.top {
+  padding: 10px 0 23px;
+}
+.brand {
+  justify-content: start;
+}
+.brand strong {
+  font:
+    800 17px "Outfit",
+    sans-serif;
+  letter-spacing: 0.7px;
+  display: block;
+}
+.brand small {
+  color: #70817b;
+  font-size: 11px;
+}
+.logo {
+  background: #183f34;
+  color: #d2f597;
+  border-radius: 13px;
+  padding: 11px;
+  display: flex;
+}
+.avatar {
+  border: 1px solid #e1e8df;
+  background: white;
+  border-radius: 50%;
+  padding: 12px;
+  color: #285446;
+}
+.hero {
+  background: #183d32;
+  color: white;
+  border-radius: 24px;
+  padding: 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+}
+.hero h1 {
+  font: 700 clamp(30px, 5vw, 54px)/1.1 "Outfit";
+  margin: 10px 0 12px;
+}
+.hero p {
+  max-width: 420px;
+  color: #c2d5ca;
+  line-height: 1.6;
+}
+.hero-icon {
+  font-size: 130px;
+  line-height: 1;
+  color: #bde888;
+  opacity: 0.9;
+}
+.eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #78978b;
+}
+.hero .eyebrow {
+  color: #c5e6ae;
+}
+.datebar {
+  padding: 29px 3px 20px;
+}
+.datebar h2,
+.card h2 {
+  font: 700 25px "Outfit";
+  margin: 5px 0;
+}
+.date-label {
+  color: #6e7d76;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+input[type="date"],
+.addrow input,
+.inputs input {
+  border: 1px solid #dfe8df;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: white;
+  color: #20362f;
+}
+.muted,
+.small {
+  font-size: 13px;
+  color: #75867c;
+}
+nav {
+  background: #e9eee8;
+  border-radius: 13px;
+  padding: 5px;
+  display: flex;
+  gap: 5px;
+  margin-bottom: 18px;
+}
+nav button {
+  border: 0;
+  background: transparent;
+  padding: 12px 20px;
+  border-radius: 10px;
+  color: #718177;
+  flex: 1;
+  font-weight: 700;
+}
+nav .selected {
+  background: white;
+  color: #183f32;
+  box-shadow: 0 1px 6px #132b2112;
+}
+.card {
+  background: white;
+  border: 1px solid #e5ebe4;
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px #243c2a06;
+}
+.sectiontop {
+  margin-bottom: 14px;
+}
+.sectiontop svg {
+  color: #75a38a;
+}
+.counter {
+  font: 800 32px "Outfit";
+  color: #1f684a;
+}
+.counter span {
+  color: #9aaba0;
+  font-size: 16px;
+}
+.progress {
+  height: 9px;
+  background: #edf1eb;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.progress > div {
+  background: #91c77e;
+  height: 100%;
+  transition: width 0.2s;
+}
+.checkrow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border-bottom: 1px solid #f0f3ee;
+  padding: 13px 3px;
+  cursor: pointer;
+}
+.checkrow:last-child {
+  border-bottom: 0;
+}
+.checkrow input {
+  appearance: none;
+  width: 21px;
+  height: 21px;
+  border: 2px solid #b7c7ba;
+  border-radius: 7px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.checkrow input:checked {
+  background: #267858;
+  border-color: #267858;
+}
+.checkrow input:checked:after {
+  content: "✓";
+  color: white;
+  display: block;
+  text-align: center;
+  line-height: 16px;
+}
+.checkrow:has(input:checked) .task > span {
+  text-decoration: line-through;
+  color: #91a096;
+}
+.task {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 14px;
+}
+.task small {
+  font-size: 10px;
+  color: #92a199;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+.addrow {
+  display: flex;
+  gap: 8px;
+  margin-top: 17px;
+}
+.addrow input {
+  flex: 1;
+  min-width: 0;
+}
+.addrow button,
+.actions button,
+.backup button {
+  background: #205c45;
+  color: white;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.minute {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.minute input {
+  width: 85px;
+  border: 1px solid #d9e5dc;
+  border-radius: 10px;
+  padding: 12px;
+  font: 700 25px "Outfit";
+  color: #1a6145;
+}
+.minute span {
+  color: #62766a;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.stats b {
+  display: block;
+  font: 800 34px "Outfit";
+  margin-top: 10px;
+}
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  margin-top: 20px;
+}
+.calendar button {
+  border: 1px solid #dde9df;
+  border-radius: 10px;
+  background: #f1f5ef;
+  aspect-ratio: 1;
+  color: #496a55;
+  font-weight: 800;
+}
+.calendar button.started {
+  background: #d2e9cc;
+}
+.calendar button.complete {
+  background: #368463;
+  color: white;
+}
+.calendar button.current {
+  outline: 2px solid #123b2c;
+  outline-offset: 2px;
+}
+.legend {
+  display: flex;
+  gap: 20px;
+  color: #7f9485;
+  margin-top: 15px;
+  font-size: 12px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 700;
+  margin: 20px 0;
+}
+.field textarea {
+  min-height: 135px;
+  resize: vertical;
+  border: 1px solid #dce6df;
+  border-radius: 10px;
+  padding: 14px;
+  font-weight: 400;
+  color: #1f382e;
+}
+.notice {
+  padding: 12px;
+  background: #f0f7e9;
+  border-radius: 10px;
+  color: #55745e;
+  font-size: 13px;
+}
+.backup {
+  padding: 20px 0;
+}
+.backup h3 {
+  font: 700 17px "Outfit";
+  margin: 0 0 5px;
+}
+.backup p {
+  color: #809087;
+  font-size: 12px;
+  margin: 0;
+}
+.backup button {
+  white-space: nowrap;
+}
+.account h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+}
+.account p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.inputs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+.actions .secondary {
+  background: #e9f1e9;
+  color: #21543e;
+}
+.error {
+  color: #b33838;
+}
+footer {
+  padding: 22px 0;
+  color: #92a197;
+  font-size: 11px;
+  border-top: 1px solid #e0e9df;
+}
+footer span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+@media (max-width: 640px) {
+  .shell {
+    padding: 12px 13px;
+  }
+  .hero {
+    padding: 28px 22px;
+  }
+  .hero-icon {
+    font-size: 75px;
+  }
+  .hero h1 {
+    font-size: 33px;
+  }
+  .hero p {
+    font-size: 12px;
+  }
+  .brand strong {
+    font-size: 14px;
+  }
+  .brand small {
+    font-size: 9px;
+  }
+  .card {
+    padding: 19px;
+  }
+  .datebar h2,
+  .card h2 {
+    font-size: 21px;
+  }
+  .calendar {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .stats {
+    gap: 7px;
+  }
+  .stats .card {
+    padding: 12px;
+  }
+  .stats b {
+    font-size: 25px;
+  }
+  .backup {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+/* Functional additions to the local-first tracker. */
+.statusline {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  color: #6c8175;
+  margin: 2px 0 16px;
+}
+.statusline span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.statusline span:last-child {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.statusline i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4d9468;
+}
+.statusline i.offline {
+  background: #bc8845;
+}
+.tracker-fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.planner-form > input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #dce6df;
+  border-radius: 10px;
+}
+.plan-options {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  margin: 10px 0 18px;
+}
+.plan-options label,
+.metrics label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b8072;
+}
+.plan-options input,
+.plan-options select,
+.metrics input {
+  min-width: 0;
+  border: 1px solid #dce6df;
+  padding: 10px;
+  border-radius: 9px;
+  background: white;
+  color: #254e3a;
+}
+.plan-options button,
+.reminder > button {
+  border: 0;
+  border-radius: 9px;
+  padding: 11px 18px;
+  background: #205c45;
+  color: white;
+}
+.empty {
+  border: 1px dashed #d5dfd3;
+  padding: 24px;
+  border-radius: 12px;
+  color: #82907e;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.taskline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #edf1eb;
+}
+.taskline .checkrow {
+  flex: 1;
+  border: 0;
+  min-width: 0;
+}
+.task {
+  overflow-wrap: anywhere;
+}
+.delete {
+  background: transparent;
+  border: 0;
+  color: #8a786c;
+  padding: 10px;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 22px;
+}
+.metrics input {
+  width: 100%;
+  font-size: 24px;
+  font-weight: 700;
+}
+.phases {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.phases > div {
+  background: #f1f5ef;
+  border: 1px solid #e4ebdf;
+  border-radius: 12px;
+  padding: 15px;
+}
+.phases .active {
+  background: #e0efcf;
+  border-color: #8dad77;
+}
+.phases small,
+.phases strong {
+  display: block;
+}
+.phases small {
+  font-size: 10px;
+  color: #6c8467;
+  margin-bottom: 6px;
+}
+.phases strong {
+  font-size: 14px;
+}
+.week-chart {
+  display: flex;
+  gap: 12px;
+  padding-top: 20px;
+}
+.day-bar {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 11px;
+  color: #6a7d6c;
+}
+.bar-track {
+  height: 140px;
+  background: #eff3eb;
+  display: flex;
+  align-items: end;
+  margin: 8px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.bar-track > div {
+  width: 100%;
+  background: #81b36b;
+  min-height: 2px;
+}
+.reminder {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.reminder h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.reminder > button {
+  flex-shrink: 0;
+}
+.import-button {
+  background: #e5eddf;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #254f3a;
+}
+.import-button input {
+  display: block;
+  max-width: 180px;
+  font-size: 10px;
+  margin-top: 6px;
+}
+.textbutton {
+  float: right;
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+  color: inherit;
+}
+.account h2 {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #7eaf55;
+  outline-offset: 3px;
+}
+button {
+  min-height: 40px;
+}
+.delete {
+  min-width: 40px;
+}
+.checkrow {
+  min-height: 52px;
+}
+.hero h1,
+.card h2,
+.datebar h2,
+.brand strong,
+.counter,
+.stats b,
+.backup h3 {
+  font-family: system-ui, sans-serif;
+}
+.hero h1 {
+  letter-spacing: -2px;
+}
+.shell {
+  max-width: 960px;
+}
+.hero {
+  padding: 38px;
+}
+.hero-icon {
+  font-size: 140px;
+}
+.notice {
+  line-height: 1.6;
+}
+.error.notice {
+  background: #fff0e9;
+  color: #913c27;
+}
+@media (max-width: 640px) {
+  nav button {
+    padding: 12px 6px;
+    font-size: 12px;
+  }
+  .hero {
+    padding: 28px 22px;
+  }
+  .hero h1 {
+    font-size: 35px;
+  }
+  .hero-icon {
+    font-size: 68px;
+  }
+  .hero p {
+    max-width: 235px;
+  }
+  .datebar {
+    align-items: start;
+  }
+  .datebar .eyebrow {
+    font-size: 8px;
+  }
+  .datebar h2 {
+    font-size: 20px;
+  }
+  .datebar .muted {
+    font-size: 11px;
+  }
+  .date-label input {
+    max-width: 135px;
+  }
+  .metrics {
+    gap: 8px;
+  }
+  .metrics label {
+    font-size: 10px;
+  }
+  .metrics input {
+    font-size: 20px;
+    padding: 10px 7px;
+  }
+  .plan-options {
+    flex-wrap: wrap;
+  }
+  .plan-options label {
+    flex: 1;
+  }
+  .reminder {
+    flex-direction: column;
+    align-items: start;
+    gap: 0;
+  }
+  .statusline {
+    font-size: 10px;
+  }
+  .statusline span:last-child {
+    display: none;
+  }
+  .week-chart {
+    gap: 7px;
+  }
+  footer {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+.install-steps {
+  padding-left: 22px;
+  color: #58705e;
+  line-height: 1.9;
+  font-size: 14px;
+}
+.phone-schedule {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin: 24px 0 12px;
+}
+.phone-schedule label {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  color: #65816b;
+  font-size: 12px;
+}
+.phone-schedule input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid #dce6df;
+  border-radius: 10px;
+  background: white;
+  color: #244e36;
+}
+.phone-schedule button,
+.phone-list button {
+  border: 0;
+  background: #205c45;
+  color: white;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+}
+.phone-list {
+  list-style: none;
+  padding: 0;
+}
+.phone-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-top: 1px solid #e7eee3;
+  gap: 15px;
+}
+.phone-list strong,
+.phone-list small {
+  display: block;
+}
+.phone-list strong {
+  font-size: 13px;
+}
+.phone-list small {
+  color: #82917d;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.alarm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #102b24b8;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.alarm-overlay .card {
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 14px 60px #0005;
+}
+.alarm-overlay h2 {
+  overflow-wrap: anywhere;
+}
+.card h2 svg {
+  vertical-align: middle;
+  margin-right: 5px;
+}
+@media (max-width: 640px) {
+  nav button {
+    font-size: 11px;
+    padding-inline: 3px;
+  }
+  .phone-schedule {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .phone-schedule label {
+    flex: auto;
+  }
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+  .shell {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+.alarm-dialog {
+  border: 1px solid #dce7d5;
+  border-radius: 20px;
+  padding: 28px;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  color: #1a302a;
+  box-shadow: 0 14px 60px #0005;
+}
+.alarm-dialog::backdrop {
+  background: #102b24b8;
+}
+.alarm-dialog h2 {
+  overflow-wrap: anywhere;
+}
+.alarm-dialog p {
+  color: #71866f;
+  font-size: 14px;
+}
+.growth-card {
+  background: #eef4e3;
+  border: 1px solid #d8e4cb;
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 18px;
+}
+.growth-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.growth-heading h2 {
+  font-size: 21px;
+  letter-spacing: -0.5px;
+  margin: 7px 0;
+}
+.level-badge {
+  font-size: 32px;
+}
+.growth-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+}
+.growth-metrics b,
+.growth-metrics small {
+  display: block;
+}
+.growth-metrics b {
+  font-size: 25px;
+  color: #285638;
+}
+.growth-metrics small {
+  font-size: 11px;
+  color: #7a8e70;
+}
+.growth-card .progress {
+  background: #dce7ce;
+}
+.growth-card .progress > div {
+  background: #6c9d51;
+}
+.badges {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 22px 0;
+}
+.badges > div {
+  padding: 14px 8px;
+  text-align: center;
+  border-radius: 12px;
+  background: #f2f4ef;
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+.badges > div.earned {
+  opacity: 1;
+  filter: none;
+  background: #eff5df;
+}
+.badges span,
+.badges strong,
+.badges small {
+  display: block;
+}
+.badges span {
+  font-size: 27px;
+  margin-bottom: 10px;
+}
+.badges strong {
+  font-size: 11px;
+}
+.badges small {
+  font-size: 10px;
+  color: #81916f;
+  margin-top: 6px;
+}
+.habit-map-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 12px 0;
+}
+.habit-map-row > span {
+  font-size: 12px;
+  color: #66806b;
+}
+.habit-map-row > div {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.habit-map-row > div span {
+  width: 18px;
+  height: 18px;
+  background: #edf1e8;
+  border-radius: 4px;
+}
+.habit-map-row > div span.hit {
+  background: #7fa760;
+}
+.routine-copy {
+  border: 1px solid #dce7d2;
+  border-radius: 9px;
+  padding: 8px 12px;
+  color: #426842;
+  background: #f2f7e9;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+.live-controls {
+  border-top: 1px solid #e2e9dc;
+  margin-top: 20px;
+  padding-top: 8px;
+}
+@media (max-width: 640px) {
+  .growth-card {
+    padding: 18px;
+  }
+  .badges {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .habit-map-row > div span {
+    width: 14px;
+    height: 14px;
+  }
+  .habit-map-row > div {
+    gap: 4px;
+  }
+  .habit-map-row > span {
+    font-size: 11px;
+  }
+  .growth-heading h2 {
+    font-size: 18px;
+  }
+}
+.planner-task details {
+  padding: 0 0 10px 36px;
+  border-bottom: 1px solid #edf1eb;
+}
+.planner-task .taskline {
+  border: 0;
+}
+.planner-task summary {
+  font-size: 11px;
+  color: #829578;
+  cursor: pointer;
+  min-height: 24px;
+}
+.task-edit {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 8px;
+  padding: 8px 0;
+}
+.task-edit label {
+  font-size: 11px;
+  color: #77906b;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.task-edit input,
+.task-edit select {
+  border: 1px solid #dce7d2;
+  border-radius: 8px;
+  background: white;
+  padding: 9px;
+  min-width: 0;
+}
+.task-edit button {
+  border: 0;
+  background: #205c45;
+  color: white;
+  border-radius: 8px;
+  justify-self: start;
+  padding: 10px 18px;
+}
+@media (max-width: 640px) {
+  .task-edit {
+    grid-template-columns: 1fr 1fr;
+  }
+  .task-edit label:first-child {
+    grid-column: 1/-1;
+  }
+}

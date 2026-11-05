@@ -1,22 +1,40 @@
 {
   "name": "better-every-day",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/unit/tracker.test.js functions/reminder-policy.test.js && vitest run",
+    "format": "prettier --write src tests functions/*.js *.json *.js README.md"
   },
   "dependencies": {
-    "firebase": "^12.0.0",
+    "firebase": "^12.19.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
     "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^31.0.0",
+    "prettier": "^3.9.10",
     "vite": "^6.3.0",
-    "vite-plugin-pwa": "^1.0.0"
+    "vite-plugin-pwa": "^1.0.0",
+    "vitest": "^5.1.0",
+    "workbox-core": "^7.4.1",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.7",
+    "glob": "^14.0.3",
+    "minimatch": "^11.0.4"
   }
 }
