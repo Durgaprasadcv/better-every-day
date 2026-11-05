@@ -89,10 +89,11 @@ export function useReminders(days, notify) {
     [],
   );
   async function enable() {
+    // Foreground reminders work even if the optional OS permission prompt stays open.
+    setEnabled(true);
     // Permission request starts directly in the click handler for iOS.
     if ("Notification" in window && Notification.permission === "default")
       await Notification.requestPermission();
-    setEnabled(true);
   }
   function snooze() {
     if (!alarm) return;

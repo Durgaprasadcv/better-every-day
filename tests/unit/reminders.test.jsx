@@ -51,3 +51,14 @@ test("completed, future, and stale tasks never trigger a foreground alarm", asyn
   });
   expect(result.current.alarm).toBe(null);
 });
+test("foreground reminders enable immediately while notification permission is pending", () => {
+  vi.stubGlobal("Notification", {
+    permission: "default",
+    requestPermission: vi.fn(() => new Promise(() => {})),
+  });
+  const { result } = renderHook(() => useReminders({}, vi.fn()));
+  act(() => {
+    result.current.enable();
+  });
+  expect(result.current.enabled).toBe(true);
+});
