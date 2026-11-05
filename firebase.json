@@ -6,7 +6,8 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "dist",
+    "public": "public",
+    "hosting": "bettereveryday-5317",
     "ignore": [
       "firebase.json",
       "**/.*",
