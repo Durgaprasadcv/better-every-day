@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "better-every-day-reminders",
+  "main": "worker.js",
+  "compatibility_date": "2026-11-01",
+  "triggers": { "crons": ["* * * * *"] },
+  "vars": {
+    "FIREBASE_PROJECT_ID": "better-every-day-594e0",
+    "APP_ORIGIN": "https://bettereveryday-5317.web.app",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "better-every-day-reminders",
+      "database_id": "REPLACE_WITH_DATABASE_ID",
+      "migrations_dir": "migrations",
+    },
+  ],
+}

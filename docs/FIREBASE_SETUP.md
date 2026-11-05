@@ -74,6 +74,8 @@ On iPhone: open the HTTPS deployment in Safari → Share → Add to Home Screen 
 
 ### Deploy the optional push scheduler
 
+**For Firebase Spark (no Blaze upgrade), use the [Cloudflare setup](CLOUDFLARE_PUSH_SETUP.md) instead.** The following section describes only the alternative Firebase Functions sender; do not deploy both.
+
 This service needs a Firebase **Blaze billing plan**, Cloud Scheduler, Cloud Functions, and Secret Manager. Review provider pricing and set budget alerts before deploying. This repository includes the implementation but does not deploy or provision paid resources automatically.
 
 1. Install backend dependencies with `npm ci --prefix functions` (the deployed runtime is Node.js 22).

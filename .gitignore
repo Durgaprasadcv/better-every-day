@@ -24,3 +24,5 @@ backups/
 /functions/src/
 /functions/tsconfig*.json
 /functions/.eslintrc.js
+cloudflare/.wrangler/
+cloudflare/.dev.vars*

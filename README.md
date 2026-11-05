@@ -66,6 +66,7 @@ src/
   main.jsx             React entry point
   sw.js                Offline cache and push notification service worker
 functions/             Private scheduled push delivery service
+cloudflare/            Alternative free-tier push sender (keeps Firebase on Spark)
 public/                Install icons and static assets
 tests/
   unit/                Domain, storage, reminder, and backup tests
@@ -81,3 +82,7 @@ See [architecture and data flow](docs/ARCHITECTURE.md) and [Firebase / iPhone se
 Run `npm test` and `npm run build`. The suite covers the daily tracker, date boundaries, storage failures, XP, alarms and snooze, revision conflicts, and edits during cloud uploads. Backend policy tests run as part of the same command. GitHub Actions also installs the backend and checks its module syntax.
 
 A real Firebase project is not included. Live Authentication, deployed security rules, two-device sync, and notification delivery on an actual iPhone require the setup and release checks in the linked guide. The Firestore emulator needs Java and was unavailable in this environment. The frontend lockfile has four low-severity transitive build-tool audit findings; the push backend currently reports no audit vulnerabilities. The production build has one size warning for the Firebase Firestore SDK chunk.
+
+## Free-tier phone reminders
+
+Use the optional [Cloudflare push sender](docs/CLOUDFLARE_PUSH_SETUP.md) for closed-app iPhone notifications while keeping Firebase on Spark. Account setup and deployment are required; the frontend alone cannot schedule background notifications.

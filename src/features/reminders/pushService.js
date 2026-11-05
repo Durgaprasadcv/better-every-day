@@ -10,7 +10,26 @@ import {
   setDoc,
   Timestamp,
 } from "firebase/firestore";
-import { db } from "../../shared/services/firebase.js";
+import { auth, db } from "../../shared/services/firebase.js";
+const pushApi = import.meta.env.VITE_PUSH_API_URL?.replace(/\/$/, "");
+async function request(uid, path, method = "GET", body, signal) {
+  const user = auth?.currentUser;
+  if (!user || user.uid !== uid)
+    throw Error("Sign in again to manage reminders.");
+  const token = await user.getIdToken();
+  const response = await fetch(`${pushApi}${path}`, {
+    method,
+    signal,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(body ? { "Content-Type": "application/json" } : {}),
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  const data = await response.json();
+  if (!response.ok) throw Error(data.error || "Reminder service unavailable.");
+  return data;
+}
 export const pushConfigured = !!import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
 export function pushSupport() {
   const ios =
@@ -47,6 +66,11 @@ function publicKey(value) {
 export async function enablePush(uid) {
   const support = pushSupport();
   if (support) throw Error(support);
+  const owner = localStorage.getItem("bed-push-owner");
+  if (owner && owner !== uid)
+    throw Error(
+      "Disable phone notifications in the previous account before enabling another account on this browser profile.",
+    );
   // Request from the original gesture before awaiting registration/network.
   const permission = await Notification.requestPermission();
   if (permission !== "granted")
@@ -64,25 +88,64 @@ export async function enablePush(uid) {
   });
   const id = deviceId();
   // A browser push subscription may belong to only one signed-in account on this profile.
-  const owner = localStorage.getItem("bed-push-owner");
   if (owner && owner !== uid)
     throw Error(
       "Disable phone notifications in the previous account before enabling another account on this browser profile.",
     );
-  await setDoc(doc(db, "users", uid, "pushDevices", id), {
-    subscription: subscription.toJSON(),
-    updatedAt: serverTimestamp(),
-  });
+  if (pushApi)
+    await request(uid, "/devices", "POST", {
+      id,
+      subscription: subscription.toJSON(),
+    });
+  else
+    await setDoc(doc(db, "users", uid, "pushDevices", id), {
+      subscription: subscription.toJSON(),
+      updatedAt: serverTimestamp(),
+    });
   localStorage.setItem("bed-push-owner", uid);
   return id;
 }
 export async function disablePush(uid) {
-  await deleteDoc(doc(db, "users", uid, "pushDevices", deviceId()));
+  if (pushApi) await request(uid, `/devices/${deviceId()}`, "DELETE");
+  else await deleteDoc(doc(db, "users", uid, "pushDevices", deviceId()));
   const registration = await navigator.serviceWorker.getRegistration();
   await (await registration?.pushManager.getSubscription())?.unsubscribe();
   localStorage.removeItem("bed-push-owner");
 }
 export function watchReminders(uid, next, error) {
+  if (pushApi) {
+    let stopped = false;
+    let timer;
+    const controller = new AbortController();
+    async function refresh() {
+      try {
+        const { items } = await request(
+          uid,
+          "/reminders",
+          "GET",
+          undefined,
+          controller.signal,
+        );
+        if (!stopped)
+          next(
+            items.map((item) => ({
+              ...item,
+              dueAt: Timestamp.fromMillis(item.due_at),
+            })),
+          );
+      } catch (e) {
+        if (!stopped) error(e);
+      } finally {
+        if (!stopped) timer = setTimeout(refresh, 30000);
+      }
+    }
+    refresh();
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }
   return onSnapshot(
     query(
       collection(db, "users", uid, "reminders"),
@@ -106,6 +169,12 @@ export async function schedulePush(uid, value) {
   if (localStorage.getItem("bed-push-owner") !== uid)
     throw Error("Enable phone notifications on this device first.");
   const id = crypto.randomUUID();
+  if (pushApi)
+    return request(uid, "/reminders", "POST", {
+      id,
+      device: deviceId(),
+      dueAt: due.getTime(),
+    });
   await setDoc(doc(db, "users", uid, "reminders", id), {
     dueAt: Timestamp.fromDate(due),
     status: "pending",
@@ -114,4 +183,6 @@ export async function schedulePush(uid, value) {
   });
 }
 export const cancelPush = (uid, id) =>
-  deleteDoc(doc(db, "users", uid, "reminders", id));
+  pushApi
+    ? request(uid, `/reminders/${encodeURIComponent(id)}`, "DELETE")
+    : deleteDoc(doc(db, "users", uid, "reminders", id));

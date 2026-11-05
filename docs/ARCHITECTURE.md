@@ -14,6 +14,7 @@ The app is a small local-first React application. Feature folders own their UI a
 - `shared/model/tracker.js` owns schema validation, the challenge start date, default records, and pure date/statistics helpers.
 - `shared/services` owns Firebase initialization and browser storage/export adapters.
 - `functions` contains the trusted push scheduler. It never reads journal or planner contents.
+- `cloudflare` provides the alternative Spark-compatible sender: Firebase ID-token authentication, owner-scoped D1 records, Cron delivery, and server-only VAPID secrets. Set `VITE_PUSH_API_URL` to select it instead of the Functions sender. See `CLOUDFLARE_PUSH_SETUP.md`.
 
 ## Data flow
 

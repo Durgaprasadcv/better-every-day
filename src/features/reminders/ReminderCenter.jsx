@@ -17,7 +17,7 @@ export default function ReminderCenter({ user, reminders, notify, online }) {
   useEffect(() => {
     setItems([]);
     setRegistered(false);
-    if (!user) return;
+    if (!user || !pushConfigured) return;
     try {
       setRegistered(localStorage.getItem("bed-push-owner") === user.uid);
     } catch {}
