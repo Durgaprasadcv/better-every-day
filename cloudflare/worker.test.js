@@ -15,6 +15,12 @@ function setup() {
       "utf8",
     ),
   );
+  db.exec(
+    readFileSync(
+      new URL("./migrations/0002_delivery_diagnostics.sql", import.meta.url),
+      "utf8",
+    ),
+  );
   const wrap = (sql, args = []) => ({
     bind: (...values) => wrap(sql, values),
     async run() {
@@ -86,6 +92,7 @@ test("rejects untrusted origins and unauthenticated requests before database acc
 });
 test("owner isolation, duplicate endpoint protection, scheduling and device cancellation", async () => {
   const { env, db } = setup();
+  const dueAt = Date.now() + 120000;
   assert.equal(
     (
       await handle(
@@ -112,7 +119,7 @@ test("owner isolation, duplicate endpoint protection, scheduling and device canc
         req(env, "/reminders", "POST", {
           id: "nudge",
           device: "phone",
-          dueAt: Date.now() + 120000,
+          dueAt,
         }),
         env,
         verify,
@@ -125,6 +132,13 @@ test("owner isolation, duplicate endpoint protection, scheduling and device canc
     env,
     verify,
   );
+  const duplicate = await handle(
+    req(env, "/reminders", "POST", { id: "duplicate", device: "phone", dueAt }),
+    env,
+    verify,
+  );
+  assert.equal(duplicate.status, 409);
+  assert.match((await duplicate.json()).error, /already scheduled/);
   assert.deepEqual((await other.json()).items, []);
   await handle(
     req(env, "/reminders/nudge", "DELETE", null, "bob"),
@@ -225,7 +239,8 @@ test("scheduler sends encrypted generic push, retries transient failure and stop
     calls++;
     assert.equal(endpoint, sub.endpoint);
     assert.equal(options.headers["Content-Encoding"], "aes128gcm");
-    assert.equal(options.redirect, "error");
+    assert.equal(options.redirect, "manual");
+    assert.equal(options.headers["Content-Length"], undefined);
     assert.ok(options.body.length > 0);
     return new Response(null, { status: calls === 1 ? 503 : 201 });
   };

@@ -167,16 +167,33 @@ export async function handle(request, env, verify = jwtVerify) {
       const result = await env.DB.prepare(
         `INSERT INTO reminders(uid,id,device,due_at)
         SELECT ?,?,?,? WHERE EXISTS(SELECT 1 FROM devices WHERE uid=? AND id=?)
+        AND NOT EXISTS(SELECT 1 FROM reminders WHERE uid=? AND device=? AND due_at=? AND status IN ('pending','sending','sent'))
         AND (SELECT COUNT(*) FROM reminders WHERE uid=? AND status IN ('pending','sending')) < 30`,
       )
-        .bind(uid, body.id, body.device, body.dueAt, uid, body.device, uid)
+        .bind(
+          uid,
+          body.id,
+          body.device,
+          body.dueAt,
+          uid,
+          body.device,
+          uid,
+          body.device,
+          body.dueAt,
+          uid,
+        )
         .run();
       if (!result.meta.changes)
         return respond(
           json(
             {
-              error:
-                "Enable this phone first, or cancel a pending reminder (limit 30).",
+              error: (await env.DB.prepare(
+                "SELECT 1 FROM reminders WHERE uid=? AND device=? AND due_at=? AND status IN ('pending','sending','sent')",
+              )
+                .bind(uid, body.device, body.dueAt)
+                .first())
+                ? "A reminder is already scheduled for this phone at that time."
+                : "Enable this phone first, or cancel a pending reminder (limit 30).",
             },
             409,
           ),
@@ -223,11 +240,13 @@ export async function deliver(env) {
       .bind(r.uid, r.device)
       .first();
     let status = "failed";
+    let lastError = device ? "invalid_subscription" : "missing_device";
     if (now - r.due_at > 86400000) status = "expired";
     else if (device) {
       const subscription = JSON.parse(device.subscription);
       if (validSubscription(subscription))
         try {
+          lastError = "request_generation";
           const details = webpush.generateRequestDetails(
             subscription,
             JSON.stringify({ id: r.id }),
@@ -241,13 +260,17 @@ export async function deliver(env) {
               },
             },
           );
+          // Let Workers compute the wire length for the encrypted body.
+          delete details.headers["Content-Length"];
+          lastError = "push_transport";
           const response = await fetch(details.endpoint, {
             method: details.method,
             headers: details.headers,
             body: details.body,
-            redirect: "error",
-            signal: AbortSignal.timeout(5000),
+            redirect: "manual",
+            signal: AbortSignal.timeout(15000),
           });
+          lastError = response.ok ? null : `push_http_${response.status}`;
           if (response.ok) status = "sent";
           else if ([404, 410].includes(response.status))
             await env.DB.prepare("DELETE FROM devices WHERE uid=? AND id=?")
@@ -255,19 +278,36 @@ export async function deliver(env) {
               .run();
           else if (retryable(response.status) && r.attempts < 3)
             status = "pending";
-        } catch {
+        } catch (error) {
+          if (lastError === "push_transport") {
+            if (error?.name === "TimeoutError" || error?.name === "AbortError")
+              lastError = "push_timeout";
+            else if (/content.length|body length/i.test(error?.message ?? ""))
+              lastError = "push_body_length";
+            else if (
+              /connection lost|socket|network/i.test(error?.message ?? "")
+            )
+              lastError = "push_connection";
+          }
           if (r.attempts < 3) status = "pending";
         }
     }
     // Deleted/canceled records are never recreated. A push already dispatched cannot be recalled.
     await env.DB.prepare(
-      "UPDATE reminders SET status=?,lease_until=0 WHERE uid=? AND id=? AND status='sending' AND lease_until=? AND attempts=?",
+      "UPDATE reminders SET status=?,last_error=?,lease_until=0 WHERE uid=? AND id=? AND status='sending' AND lease_until=? AND attempts=?",
     )
-      .bind(status, r.uid, r.id, lease, r.attempts)
+      .bind(
+        status,
+        status === "expired" ? null : lastError,
+        r.uid,
+        r.id,
+        lease,
+        r.attempts,
+      )
       .run();
   }
   await env.DB.prepare(
-    "UPDATE reminders SET status='failed' WHERE status='sending' AND attempts>=3 AND lease_until<=?",
+    "UPDATE reminders SET status='failed',last_error='lease_expired' WHERE status='sending' AND attempts>=3 AND lease_until<=?",
   )
     .bind(now)
     .run();

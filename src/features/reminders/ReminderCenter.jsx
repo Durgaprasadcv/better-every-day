@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, Smartphone } from "lucide-react";
 import {
   cancelPush,
@@ -10,7 +10,8 @@ import {
   watchReminders,
 } from "./pushService.js";
 export default function ReminderCenter({ user, reminders, notify, online }) {
-  const [busy, setBusy] = useState(false),
+  const pending = useRef(null);
+  const [busy, setBusy] = useState(null),
     [items, setItems] = useState([]),
     [when, setWhen] = useState("");
   const [registered, setRegistered] = useState(false);
@@ -23,20 +24,23 @@ export default function ReminderCenter({ user, reminders, notify, online }) {
     } catch {}
     return watchReminders(user.uid, setItems, () =>
       notify(
-        "Could not load phone reminders. Check your connection and deployed Firestore rules.",
+        "Could not load phone reminders. Check your connection and try again.",
       ),
     );
   }, [user, notify]);
   const support = pushSupport();
-  async function action(fn, success) {
-    setBusy(true);
+  async function action(label, fn, success) {
+    if (pending.current) return;
+    pending.current = label;
+    setBusy(label);
     try {
       await fn();
       notify(success);
     } catch (e) {
       notify(e.message);
     } finally {
-      setBusy(false);
+      pending.current = null;
+      setBusy(null);
     }
   }
   return (
@@ -137,10 +141,14 @@ export default function ReminderCenter({ user, reminders, notify, online }) {
               <button
                 disabled={busy || !online || !!support}
                 onClick={() =>
-                  action(async () => {
-                    await enablePush(user.uid);
-                    setRegistered(true);
-                  }, "This device is registered for phone reminders.")
+                  action(
+                    "Enabling phone notifications…",
+                    async () => {
+                      await enablePush(user.uid);
+                      setRegistered(true);
+                    },
+                    "This device is registered for phone reminders.",
+                  )
                 }
               >
                 Enable this phone
@@ -148,10 +156,14 @@ export default function ReminderCenter({ user, reminders, notify, online }) {
               <button
                 disabled={busy || !online || !registered}
                 onClick={() =>
-                  action(async () => {
-                    await disablePush(user.uid);
-                    setRegistered(false);
-                  }, "Phone notifications disabled on this device.")
+                  action(
+                    "Disabling phone notifications…",
+                    async () => {
+                      await disablePush(user.uid);
+                      setRegistered(false);
+                    },
+                    "Phone notifications disabled on this device.",
+                  )
                 }
               >
                 Disable this phone
@@ -162,7 +174,11 @@ export default function ReminderCenter({ user, reminders, notify, online }) {
               onSubmit={(e) => {
                 e.preventDefault();
                 action(
-                  () => schedulePush(user.uid, when),
+                  "Scheduling reminder…",
+                  async () => {
+                    await schedulePush(user.uid, when);
+                    setWhen("");
+                  },
                   "Phone reminder saved. Delivery may be delayed by your device or network.",
                 );
               }}
@@ -172,14 +188,20 @@ export default function ReminderCenter({ user, reminders, notify, online }) {
                 <input
                   type="datetime-local"
                   required
+                  disabled={!!busy}
                   value={when}
                   onChange={(e) => setWhen(e.target.value)}
                 />
               </label>
               <button disabled={busy || !online || !registered}>
-                Schedule phone reminder
+                {busy === "Scheduling reminder…"
+                  ? "Scheduling…"
+                  : "Schedule phone reminder"}
               </button>
             </form>
+            <div className="small" role="status">
+              {busy}
+            </div>
             <p className="small">
               Uses the time zone of this device. One-time reminders are
               independent of planner tasks and remain scheduled until canceled.
@@ -204,7 +226,13 @@ export default function ReminderCenter({ user, reminders, notify, online }) {
                     disabled={busy || !online}
                     onClick={() =>
                       action(
-                        () => cancelPush(user.uid, item.id),
+                        "Removing reminder…",
+                        async () => {
+                          await cancelPush(user.uid, item.id);
+                          setItems((current) =>
+                            current.filter(({ id }) => id !== item.id),
+                          );
+                        },
                         "Reminder removed. An alert already dispatched may still arrive.",
                       )
                     }

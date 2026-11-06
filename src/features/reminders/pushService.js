@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../../shared/services/firebase.js";
 const pushApi = import.meta.env.VITE_PUSH_API_URL?.replace(/\/$/, "");
+const remindersChanged = "bed-reminders-changed";
 async function request(uid, path, method = "GET", body, signal) {
   const user = auth?.currentUser;
   if (!user || user.uid !== uid)
@@ -28,6 +29,7 @@ async function request(uid, path, method = "GET", body, signal) {
   });
   const data = await response.json();
   if (!response.ok) throw Error(data.error || "Reminder service unavailable.");
+  if (method !== "GET") window.dispatchEvent(new Event(remindersChanged));
   return data;
 }
 export const pushConfigured = !!import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
@@ -116,17 +118,20 @@ export function watchReminders(uid, next, error) {
   if (pushApi) {
     let stopped = false;
     let timer;
-    const controller = new AbortController();
+    let controller;
     async function refresh() {
+      clearTimeout(timer);
+      controller?.abort();
+      const current = (controller = new AbortController());
       try {
         const { items } = await request(
           uid,
           "/reminders",
           "GET",
           undefined,
-          controller.signal,
+          current.signal,
         );
-        if (!stopped)
+        if (!stopped && !current.signal.aborted)
           next(
             items.map((item) => ({
               ...item,
@@ -134,16 +139,21 @@ export function watchReminders(uid, next, error) {
             })),
           );
       } catch (e) {
-        if (!stopped) error(e);
+        if (!stopped && !current.signal.aborted) error(e);
       } finally {
-        if (!stopped) timer = setTimeout(refresh, 30000);
+        if (!stopped && !current.signal.aborted)
+          timer = setTimeout(refresh, 30000);
       }
     }
     refresh();
+    window.addEventListener(remindersChanged, refresh);
+    window.addEventListener("focus", refresh);
     return () => {
       stopped = true;
       clearTimeout(timer);
-      controller.abort();
+      controller?.abort();
+      window.removeEventListener(remindersChanged, refresh);
+      window.removeEventListener("focus", refresh);
     };
   }
   return onSnapshot(
