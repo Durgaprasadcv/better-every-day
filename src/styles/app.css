@@ -377,6 +377,26 @@ nav .selected {
   background: #e9f1e9;
   color: #21543e;
 }
+.account-sign-in .inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 12px;
+}
+.account-sign-in .inputs input {
+  min-width: 0;
+  font-size: 16px;
+}
+.account-sign-in .actions {
+  gap: 10px;
+}
+.account-sign-in .account-alternatives {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #dfe8df;
+}
+.account-sign-in button {
+  min-height: 44px;
+}
 .error {
   color: #b33838;
 }

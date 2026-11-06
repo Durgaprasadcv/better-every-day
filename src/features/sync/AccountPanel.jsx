@@ -174,6 +174,7 @@ export default function AccountPanel({
         </>
       ) : (
         <form
+          className="account-sign-in"
           onSubmit={(e) => {
             e.preventDefault();
             login(false);
@@ -224,6 +225,7 @@ export default function AccountPanel({
               Create account
             </button>
             <button
+              className="secondary"
               disabled={busy || !online}
               type="button"
               onClick={recoverPassword}
@@ -231,7 +233,7 @@ export default function AccountPanel({
               Forgot password?
             </button>
           </div>
-          <div className="actions">
+          <div className="actions account-alternatives">
             <button
               disabled={busy || !online}
               type="button"
