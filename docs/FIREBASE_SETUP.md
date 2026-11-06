@@ -15,7 +15,7 @@
    firebase deploy --only firestore:rules
    ```
 
-6. Open the cloud button, create an account or sign in, then choose **Back up to cloud** for a manual snapshot or **Enable live saving** for automatic saving during this session.
+6. Open the cloud button, create an account or sign in, then choose **Back up to cloud** for a manual snapshot or **Enable live saving** for automatic saving on this browser.
 7. On another device, sign in, choose **Review cloud restore**, export any current local entries, then choose **Replace local entries**.
 
 Firebase Web App configuration is delivered to the browser; security comes from Authentication and Firestore rules. Never use an Admin SDK key in this app. `.env*` (except the empty example), Firebase CLI state, logs, exports, and service account files are ignored. Review staged files before committing to this public repository.
@@ -32,7 +32,7 @@ See Firebase's [transaction behavior](https://firebase.google.com/docs/firestore
 
 ## Live Firebase saving
 
-Live saving is opt-in **per session** from the cloud/account panel. It includes private reflections, tasks, habits, and metrics in the signed-in user's snapshot. Signing in alone leaves it off. A 700 ms debounce reduces writes while typing. Changes save locally before any upload, so pending edits survive closing the browser. Re-enable live saving after reopening to resume.
+Live saving is opt-in for each account and browser profile from the cloud/account panel. It includes private reflections, tasks, habits, and metrics in the signed-in user's snapshot. After you opt in, live saving resumes when you reopen with the same signed-in account. Turning it off or signing out through the account panel clears that preference. Safari and the iPhone Home Screen app each require their own opt-in. A 700 ms debounce reduces writes while typing. Changes save locally before any upload, so pending edits survive closing the browser.
 
 A realtime listener downloads remote changes only when this device has no conflicting edits. Both uploads and manual backups use revision-checked transactions on the same document. Map keys are canonicalized for comparison so Firestore's ordering cannot create false conflicts. If both devices changed, automatic saving pauses; export both versions, then choose **Use cloud version** or **Keep device version**. The latter still uses a revision-checked transaction, so another intervening update triggers review again. Automatic field merging is deliberately deferred.
 

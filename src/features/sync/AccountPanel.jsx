@@ -134,11 +134,12 @@ export default function AccountPanel({
             </button>
             <button
               disabled={busy}
-              onClick={() =>
+              onClick={() => {
+                live.disable();
                 signOut(auth).catch(() =>
                   setMessage("Could not sign out. Please retry."),
-                )
-              }
+                );
+              }}
             >
               Sign out
             </button>
@@ -149,10 +150,11 @@ export default function AccountPanel({
           <div className="live-controls">
             <h3>Live Firebase saving</h3>
             <p className="small">
-              Enable each session to automatically save all device entries,
-              including reflections, to this account. Offline edits remain local
-              and retry when connected. Other devices update live; conflicts
-              require your review.
+              Enable live saving to automatically save your entries, including
+              reflections, to this account. This choice is remembered here until
+              you turn it off or sign out. Enable it separately in Safari and
+              the Home Screen app. Offline edits sync when you reconnect.
+              Conflicts require your review.
             </p>
             <div className="actions">
               <button
