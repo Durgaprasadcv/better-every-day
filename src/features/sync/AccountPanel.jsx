@@ -2,7 +2,11 @@ import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  signInAnonymously,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
 } from "firebase/auth";
 import { auth, configured } from "../../shared/services/firebase.js";
@@ -18,6 +22,51 @@ export default function AccountPanel({
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [authBusy, setAuthBusy] = useState(false);
   const busy = operationBusy || authBusy;
+  async function recoverPassword() {
+    const email = credentials.email.trim();
+    if (!email) {
+      setMessage("Enter your account email first.");
+      return;
+    }
+    setAuthBusy(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage(
+        "If an account exists for this email, check your inbox and spam folder for a reset link.",
+      );
+    } catch (error) {
+      setMessage(
+        error.code === "auth/user-not-found"
+          ? "If an account exists for this email, check your inbox and spam folder for a reset link."
+          : "Could not request a reset. Check the email address and your connection, then try again.",
+      );
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+  async function alternateLogin(guest) {
+    setAuthBusy(true);
+    try {
+      if (guest) await signInAnonymously(auth);
+      else await signInWithPopup(auth, new GoogleAuthProvider());
+      setMessage(
+        guest
+          ? "Signed in as a guest on this device."
+          : "Signed in with Google.",
+      );
+    } catch (error) {
+      setMessage(
+        error.code === "auth/account-exists-with-different-credential"
+          ? "Use the original sign-in method for this email. You can reset an email password above."
+          : error.code === "auth/popup-blocked" ||
+              error.code === "auth/operation-not-supported-in-this-environment"
+            ? "Google sign-in could not open. Use email sign-in on this device."
+            : "Could not sign in. Check your connection and try again.",
+      );
+    } finally {
+      setAuthBusy(false);
+    }
+  }
   async function login(create) {
     setAuthBusy(true);
     try {
@@ -63,7 +112,13 @@ export default function AccountPanel({
         </p>
       ) : user ? (
         <>
-          <p>Signed in as {user.email}</p>
+          <p>Signed in as {user.isAnonymous ? "a guest" : user.email}</p>
+          {user.isAnonymous && (
+            <p className="small">
+              Guest sign-in is tied to this browser profile. Signing out or
+              clearing site data can make guest cloud data inaccessible.
+            </p>
+          )}
           <div className="actions">
             <button
               disabled={disabled || !online || live.enabled}
@@ -168,7 +223,34 @@ export default function AccountPanel({
             >
               Create account
             </button>
+            <button
+              disabled={busy || !online}
+              type="button"
+              onClick={recoverPassword}
+            >
+              Forgot password?
+            </button>
           </div>
+          <div className="actions">
+            <button
+              disabled={busy || !online}
+              type="button"
+              onClick={() => alternateLogin(false)}
+            >
+              Continue with Google
+            </button>
+            <button
+              disabled={busy || !online}
+              type="button"
+              onClick={() => alternateLogin(true)}
+            >
+              Continue as guest
+            </button>
+          </div>
+          <p className="small">
+            To recover an existing email account, reset its password. Guest
+            sign-in creates a separate account.
+          </p>
         </form>
       )}
     </section>
