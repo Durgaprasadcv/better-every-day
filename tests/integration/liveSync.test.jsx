@@ -38,6 +38,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   localStorage.clear();
   vi.clearAllMocks();
+  mock.listener = null;
   mock.backup.mockResolvedValue(1);
 });
 afterEach(() => {
@@ -77,6 +78,28 @@ test("live saving is opt-in and debounces a new local snapshot", async () => {
   });
   expect(mock.backup).toHaveBeenCalledWith("a", payload, 0);
   expect(result.current.status).toContain("All changes saved");
+});
+test("live saving remembers the opt-in after reopening for the same account", () => {
+  const open = (uid) =>
+    renderHook(() =>
+      useLiveSync({
+        user: { uid },
+        data: emptyData(),
+        applyRemote: vi.fn(),
+        paused: false,
+      }),
+    );
+  const original = open("a");
+  act(() => original.result.current.enable());
+  original.unmount();
+  const other = open("b");
+  expect(other.result.current.enabled).toBe(false);
+  other.unmount();
+  const reopened = open("a");
+  expect(reopened.result.current.enabled).toBe(true);
+  act(() => reopened.result.current.disable());
+  reopened.unmount();
+  expect(open("a").result.current.enabled).toBe(false);
 });
 test("typing while an upload is in flight queues the latest state", async () => {
   let finish;

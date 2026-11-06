@@ -37,7 +37,7 @@ Local persistence completes before React applies an edit. A failed write keeps t
 
 The schema-2 tracker snapshot has a date-keyed `days` map. Each day stores checked habit IDs, timed tasks, walking minutes, sleep/screen hours, wins, and reflection. All dates use the device's local calendar day. The challenge is anchored at 6 November 2026, but the tracker accepts dates outside that challenge.
 
-Cloud storage is `/users/{uid}/app/tracker`. Revisions increase through transactions; server timestamps bind writes to the current request. Live saving keeps an account-specific acknowledged base locally and compares canonical JSON snapshots. Conflicts pause writes and require an explicit version choice. Data remains local while offline; re-enabling live saving after reopening resumes from persisted local edits. Automatic field-level merge and per-record sync are future improvements.
+Cloud storage is `/users/{uid}/app/tracker`. Revisions increase through transactions and server timestamps bind writes to the current request. Live saving keeps an account-specific acknowledged base locally and compares canonical JSON snapshots. Conflicts pause writes and require an explicit version choice. Data remains local while offline. Live saving resumes from persisted local edits after reopening with the same account and a saved opt-in in that browser profile. Automatic field-level merge and per-record sync are future improvements.
 
 ## Notifications
 

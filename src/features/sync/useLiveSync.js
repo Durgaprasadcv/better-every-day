@@ -4,6 +4,17 @@ import { db } from "../../shared/services/firebase.js";
 import { backup, restore } from "./backupService.js";
 import { emptyData, validateData } from "../../shared/model/tracker.js";
 const metadataKey = (uid) => `bed-live-sync:${uid}`;
+const preferenceKey = (uid) => `bed-live-sync-enabled:${uid}`;
+
+function readSyncState(uid) {
+  const raw = JSON.parse(localStorage.getItem(metadataKey(uid)) || "null");
+  return {
+    revision: Number.isInteger(raw?.revision) ? raw.revision : 0,
+    base: typeof raw?.base === "string" ? raw.base : null,
+    ready: false,
+    inflight: null,
+  };
+}
 function canonical(value) {
   if (Array.isArray(value)) return value.map(canonical);
   if (value && typeof value === "object")
@@ -36,7 +47,7 @@ export function decideRemote(
   return "conflict";
 }
 export function useLiveSync({ user, data, applyRemote, paused }) {
-  const [enabled, setEnabled] = useState(false),
+  const [enabledUid, setEnabledUid] = useState(null),
     [status, setStatus] = useState("Live saving is off"),
     [conflict, setConflict] = useState(null),
     [tick, setTick] = useState(0);
@@ -53,6 +64,7 @@ export function useLiveSync({ user, data, applyRemote, paused }) {
   applyRef.current = applyRemote;
   pausedRef.current = paused;
   const uid = user?.uid;
+  const enabled = !!uid && enabledUid === uid;
   const session = useRef(0);
   function persist() {
     try {
@@ -67,7 +79,7 @@ export function useLiveSync({ user, data, applyRemote, paused }) {
       setStatus(
         "Saved locally; sync metadata could not be stored. Free browser storage before continuing.",
       );
-      setEnabled(false);
+      setEnabledUid(null);
     }
   }
   function acknowledge(remote, revision) {
@@ -77,9 +89,20 @@ export function useLiveSync({ user, data, applyRemote, paused }) {
     persist();
   }
   useEffect(() => {
-    setEnabled(false);
+    setEnabledUid(null);
     setConflict(null);
+    setStatus("Live saving is off");
     state.current = { revision: 0, base: null, ready: false, inflight: null };
+    if (!uid) return;
+    try {
+      if (localStorage.getItem(preferenceKey(uid)) !== "true") return;
+      state.current = readSyncState(uid);
+      setEnabledUid(uid);
+    } catch {
+      setStatus(
+        "Could not restore live saving. Your entries still save on this device.",
+      );
+    }
   }, [uid]);
   useEffect(() => {
     const online = () => {
@@ -235,16 +258,12 @@ export function useLiveSync({ user, data, applyRemote, paused }) {
     return () => clearTimeout(timer);
   }, [enabled, uid, data, paused, conflict, tick]);
   function enable() {
+    if (!uid || enabled) return;
     try {
-      const raw = JSON.parse(localStorage.getItem(metadataKey(uid)) || "null");
-      state.current = {
-        revision: Number.isInteger(raw?.revision) ? raw.revision : 0,
-        base: typeof raw?.base === "string" ? raw.base : null,
-        ready: false,
-        inflight: null,
-      };
+      state.current = readSyncState(uid);
+      localStorage.setItem(preferenceKey(uid), "true");
       setConflict(null);
-      setEnabled(true);
+      setEnabledUid(uid);
     } catch {
       setStatus(
         "Live saving metadata is unavailable. Export your local entries and free browser storage first.",
@@ -274,8 +293,16 @@ export function useLiveSync({ user, data, applyRemote, paused }) {
       setTick((t) => t + 1);
     },
     disable: () => {
-      setEnabled(false);
+      setEnabledUid(null);
+      setConflict(null);
       setStatus("Live saving is off · entries still save on this device");
+      try {
+        if (uid) localStorage.removeItem(preferenceKey(uid));
+      } catch {
+        setStatus(
+          "Live saving is off for now. The change could not be saved for next time.",
+        );
+      }
     },
     chooseCloud,
     chooseDevice,
