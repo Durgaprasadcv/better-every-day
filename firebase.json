@@ -1,4 +1,39 @@
 {
-  "firestore": {"rules": "firestore.rules"},
-  "hosting": {"public": "dist", "ignore": ["firebase.json", "**/.*", "**/node_modules/**"], "rewrites": [{"source": "**", "destination": "/index.html"}]}
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-south1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "site": "bettereveryday-5317"
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "*.log",
+      ".env*",
+      "src",
+      "tsconfig*.json",
+      ".eslintrc.js"
+    ],
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run check"
+    ]
+  }
 }
