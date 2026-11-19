@@ -9,6 +9,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, configured } from "../shared/services/firebase.js";
 import {
   PHASES,
+  START,
+  offsetDay,
   dayNumber,
   emptyData,
   emptyDay,
@@ -130,7 +132,8 @@ export default function App() {
         : [...selected.checked, id],
     });
   }
-  const n = dayNumber(date);
+  const challengeStart = data.challengeStart || START;
+  const n = dayNumber(date, challengeStart);
   const week = useMemo(() => weeklyStats(data, date), [data, date]);
   const disabled = busy || storageConflict || !!initial.error;
   async function cloud(direction) {
@@ -318,7 +321,8 @@ export default function App() {
         <div className="datebar">
           <div>
             <span className="eyebrow">
-              YOUR 30-DAY RESET · 6 NOV – 5 DEC 2026
+              YOUR 30-DAY RESET · {challengeStart} –{" "}
+              {offsetDay(challengeStart, 29)}
             </span>
             <h2>
               {n < 1
@@ -375,6 +379,24 @@ export default function App() {
         )}
         {tab === "Challenge" && (
           <ChallengeView
+            key={challengeStart}
+            disabled={disabled}
+            onStartChange={(start) => {
+              try {
+                const next = validateData({
+                  ...current.current,
+                  challengeStart: start,
+                });
+                if (commit(next)) {
+                  setDate(start);
+                  setMessage(
+                    "Challenge restarted. Your selected date is Day 1.",
+                  );
+                }
+              } catch (error) {
+                setMessage(error.message);
+              }
+            }}
             data={data}
             date={date}
             onSelect={(d) => {

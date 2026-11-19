@@ -88,6 +88,33 @@ test("a change in another tab pauses edits instead of replacing that tab", () =>
   );
 });
 
+test("challenge restart sets Day 1, persists across reload and preserves entries", async () => {
+  const user = userEvent.setup();
+  const view = render(<App />);
+  await user.click(screen.getByRole("checkbox", { name: /Own a household/ }));
+  const previous = JSON.parse(localStorage.getItem(KEY)).days;
+  await user.click(
+    screen.getByRole("button", { name: "Challenge", exact: true }),
+  );
+  fireEvent.change(screen.getByLabelText("Challenge start date"), {
+    target: { value: "2026-11-19" },
+  });
+  await user.click(screen.getByRole("button", { name: "Save start date" }));
+  expect(screen.getByRole("heading", { name: "Day 1 of 30" })).toBeTruthy();
+  expect(JSON.parse(localStorage.getItem(KEY))).toMatchObject({
+    challengeStart: "2026-11-19",
+    days: previous,
+  });
+  view.unmount();
+  render(<App />);
+  await user.click(
+    screen.getByRole("button", { name: "Challenge", exact: true }),
+  );
+  expect(screen.getByLabelText("Challenge start date").value).toBe(
+    "2026-11-19",
+  );
+});
+
 test("undo restores only the removed task and keeps tasks added afterward", async () => {
   const user = userEvent.setup();
   render(<App />);

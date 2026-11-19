@@ -572,6 +572,19 @@ footer span {
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
+.challenge-settings {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+.challenge-settings .actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.challenge-settings input {
+  font-size: 16px;
+  max-width: 100%;
+}
 .phases > div {
   background: #f1f5ef;
   border: 1px solid #e4ebdf;

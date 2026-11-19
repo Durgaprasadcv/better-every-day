@@ -23,9 +23,9 @@ export function offsetDay(date, offset) {
   d.setUTCDate(d.getUTCDate() + offset);
   return d.toISOString().slice(0, 10);
 }
-export const dayNumber = (date) =>
+export const dayNumber = (date, start = START) =>
   Math.round(
-    (Date.parse(`${date}T12:00:00Z`) - Date.parse(`${START}T12:00:00Z`)) /
+    (Date.parse(`${date}T12:00:00Z`) - Date.parse(`${start}T12:00:00Z`)) /
       86400000,
   ) + 1;
 export const phaseIndex = (n) => (n <= 7 ? 0 : n <= 14 ? 1 : n <= 21 ? 2 : 3);
@@ -40,6 +40,14 @@ export const emptyDay = () => ({
   screen: 0,
 });
 export function validateData(value) {
+  if (
+    value?.challengeStart !== undefined &&
+    (typeof value.challengeStart !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(value.challengeStart) ||
+      !Number.isFinite(Date.parse(value.challengeStart)) ||
+      offsetDay(value.challengeStart, 0) !== value.challengeStart)
+  )
+    throw Error("Invalid challenge start date.");
   if (
     !value ||
     value.schemaVersion !== 2 ||
@@ -102,7 +110,11 @@ export function validateData(value) {
     throw Error(
       "Backup exceeds the supported size. Export and archive older entries first.",
     );
-  return { schemaVersion: 2, days: value.days };
+  return {
+    schemaVersion: 2,
+    days: value.days,
+    ...(value.challengeStart ? { challengeStart: value.challengeStart } : {}),
+  };
 }
 export function weeklyStats(data, end) {
   return Array.from({ length: 7 }, (_, i) => {
