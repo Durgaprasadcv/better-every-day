@@ -11,7 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
       - run: npm ci
+      - run: npm test
       - name: Build with production configuration
         env:
           VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
@@ -29,6 +34,17 @@ jobs:
             fi
           done
           npm run build
+      - name: Deploy private Firestore rules
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BETTER_EVERY_DAY_594E0 }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/better-every-day-firebase.json
+        shell: bash
+        run: |
+          umask 077
+          trap 'rm -f "$GOOGLE_APPLICATION_CREDENTIALS"' EXIT
+          node --input-type=module -e 'import fs from "node:fs"; const account = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT); fs.writeFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, JSON.stringify(account), { mode: 0o600 });'
+          unset FIREBASE_SERVICE_ACCOUNT
+          npx --yes firebase-tools@15.35.0 deploy --only firestore:rules --project better-every-day-594e0 --non-interactive
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
