@@ -5,7 +5,10 @@ service cloud.firestore {
     match /users/{userId}/app/tracker {
       function valid() {
         return request.resource.data.keys().hasAll(['schemaVersion', 'days', 'revision', 'updatedAt'])
-          && request.resource.data.keys().hasOnly(['schemaVersion', 'days', 'revision', 'updatedAt'])
+          && request.resource.data.keys().hasOnly(['schemaVersion', 'days', 'revision', 'updatedAt', 'challengeStart'])
+          && (!('challengeStart' in request.resource.data)
+            || (request.resource.data.challengeStart is string
+              && request.resource.data.challengeStart.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')))
           && request.resource.data.schemaVersion == 2
           && request.resource.data.days is map
           && request.resource.data.days.size() <= 3660
