@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   HABITS,
   PHASES,
@@ -5,16 +6,64 @@ import {
   dayNumber,
   offsetDay,
   phaseIndex,
+  localDay,
 } from "../../shared/model/tracker.js";
-export default function ChallengeView({ data, date, onSelect }) {
-  const n = dayNumber(date);
+export default function ChallengeView({
+  data,
+  date,
+  onSelect,
+  onStartChange,
+  disabled,
+}) {
+  const start = data.challengeStart || START;
+  const [draftStart, setDraftStart] = useState(start);
+  const n = dayNumber(date, start);
   return (
     <section className="card">
       <span className="eyebrow">CONSISTENCY OVER PERFECTION</span>
       <h2>30 days. A stronger foundation.</h2>
       <p className="muted">
-        6 November – 5 December 2026. Choose any day to plan ahead or check in.
+        {start} – {offsetDay(start, 29)}. Choose any day to plan ahead or check
+        in.
       </p>
+      <form
+        className="challenge-settings"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onStartChange(draftStart);
+        }}
+      >
+        <label className="date-label">
+          Challenge start date
+          <input
+            type="date"
+            required
+            value={draftStart}
+            disabled={disabled}
+            onChange={(event) => setDraftStart(event.target.value)}
+          />
+        </label>
+        <div className="actions">
+          <button disabled={disabled || !draftStart || draftStart === start}>
+            Save start date
+          </button>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              const today = localDay();
+              setDraftStart(today);
+              onStartChange(today);
+            }}
+          >
+            Start fresh today
+          </button>
+        </div>
+        <p className="small">
+          Your new date becomes Day 1. Previous entries stay on their original
+          dates. The start date is included in backups and live saving.
+        </p>
+      </form>
       <div className="phases">
         {PHASES.map((p, i) => (
           <div
@@ -30,7 +79,7 @@ export default function ChallengeView({ data, date, onSelect }) {
       </div>
       <div className="calendar">
         {Array.from({ length: 30 }, (_, i) => {
-          const d = offsetDay(START, i),
+          const d = offsetDay(start, i),
             count = data.days[d]?.checked.length || 0;
           return (
             <button
