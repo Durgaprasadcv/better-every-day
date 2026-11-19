@@ -103,6 +103,22 @@ test("local save and reload round-trip while failures preserve existing content"
   map.set(KEY, "invalid");
   assert.throws(() => readLocal(storage));
 });
+test("custom challenge dates survive backup validation and keep phase boundaries", () => {
+  const value = { ...sample(), challengeStart: "2026-11-19" };
+  assert.equal(validateData(value).challengeStart, "2026-11-19");
+  assert.equal(dayNumber("2026-11-19", value.challengeStart), 1);
+  assert.equal(dayNumber("2026-12-18", value.challengeStart), 30);
+  assert.equal(dayNumber(START), 1);
+  assert.throws(
+    () => validateData({ ...value, challengeStart: "2026-02-30" }),
+    /Invalid challenge/,
+  );
+  assert.throws(
+    () => validateData({ ...value, challengeStart: "" }),
+    /Invalid challenge/,
+  );
+});
+
 test("changed remote revisions block overwrites", () => {
   assert.doesNotThrow(() => assertRevision(0, 0));
   assert.doesNotThrow(() => assertRevision(3, 3));
